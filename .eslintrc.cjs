@@ -4,9 +4,13 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'prettier', // eslint-config-prettier
+    'plugin:prettier/recommended', // eslint-plugin-prettier
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs', 'bin.js'],
   parser: '@typescript-eslint/parser',
   plugins: [],
-  rules: {},
+  rules: {
+    'prettier/prettier': ['error'],
+  },
 }
