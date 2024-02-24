@@ -30,5 +30,5 @@ export type InitOptions = {
     height: number;
   };
   featuresWithVersion: Record<string, string>;
-  metadatas: Record<string, string>;
+  metadatas?: Record<string, string>;
 };

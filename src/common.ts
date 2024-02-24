@@ -1,11 +1,26 @@
 import readline from "node:readline";
 import { stdin } from "node:process";
 
-export async function* parseGameState() {
+import { initOptionsSchema, gameSchema } from "./schemas";
+
+function makeLineIterator(stdinIterator: AsyncIterableIterator<string>) {
+  return async function* () {
+    for await (const line of stdinIterator) {
+      yield gameSchema.parse(JSON.parse(line));
+    }
+  };
+}
+
+export async function parseGameState() {
   const readStdin = readline.createInterface({ input: stdin });
-  for await (const line of readStdin) {
-    yield line;
-  }
+  const stdinIterator = readStdin[Symbol.asyncIterator]();
+  const options = initOptionsSchema.parse(
+    JSON.parse((await stdinIterator.next()).value),
+  );
+  return {
+    options,
+    lines: makeLineIterator(stdinIterator),
+  };
 }
 
 type StdoutStream = typeof process.stdout;
