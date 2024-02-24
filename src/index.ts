@@ -1,3 +1,3 @@
-import {foo} from './common';
+import { foo } from "./common";
 
 console.log(foo());
