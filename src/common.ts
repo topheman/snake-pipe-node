@@ -1,7 +1,16 @@
 import readline from "node:readline";
 import { stdin } from "node:process";
 
+import packageJson from "../package.json";
 import { initOptionsSchema, gameSchema } from "./schemas";
+
+export function version() {
+  return packageJson.version;
+}
+
+export function formatVersionToDisplay() {
+  return `snakepipe@${packageJson.version}(node)`;
+}
 
 function makeLineIterator(stdinIterator: AsyncIterableIterator<string>) {
   return async function* () {

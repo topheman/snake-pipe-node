@@ -1,9 +1,9 @@
 import { program } from "commander";
-import packageJson from "../package.json";
 
+import { version, formatVersionToDisplay } from "./common";
 import validate from "./validate";
 
-program.name("snakepipe-node").version(packageJson.version);
+program.name(formatVersionToDisplay()).version(version());
 
 program
   .command("validate")
