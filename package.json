@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/topheman/snake-pipe-node#readme",
   "devDependencies": {
+    "@types/node": "^20.11.20",
     "typescript": "^5.3.3"
   }
 }
