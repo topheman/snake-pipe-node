@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/topheman/snake-pipe-node/issues"
   },
-  "homepage": "https://github.com/topheman/snake-pipe-node#readme"
+  "homepage": "https://github.com/topheman/snake-pipe-node#readme",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
 }
