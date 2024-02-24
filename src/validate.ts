@@ -1,8 +1,9 @@
-import { parseGameState } from "./common";
+import { parseGameState, makeWriteLine } from "./common";
 
 export default async function () {
+  const writeLine = makeWriteLine(process.stdout);
   const gameState = parseGameState();
   for await (const line of gameState) {
-    console.log(line);
+    writeLine(line);
   }
 }

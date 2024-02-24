@@ -7,3 +7,18 @@ export async function* parseGameState() {
     yield line;
   }
 }
+
+type StdoutStream = typeof process.stdout;
+
+export function makeWriteLine(stdout: StdoutStream) {
+  if (stdout.isTTY) {
+    return function writeLineToTTY(str: string) {
+      process.stdout.write(`${str}\n`);
+      process.stdout.cursorTo(0);
+    };
+  } else {
+    return function writeLine(str: string) {
+      console.log(str);
+    };
+  }
+}
