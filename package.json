@@ -1,0 +1,26 @@
+{
+  "name": "snakepipe",
+  "version": "0.0.1",
+  "description": "A node implementation of the rust snakepipe crate",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/topheman/snake-pipe-node.git"
+  },
+  "keywords": [
+    "cli",
+    "game",
+    "snake",
+    "unix",
+    "pipe"
+  ],
+  "author": "Christophe Rosset",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/topheman/snake-pipe-node/issues"
+  },
+  "homepage": "https://github.com/topheman/snake-pipe-node#readme"
+}
