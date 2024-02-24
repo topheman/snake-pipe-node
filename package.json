@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "rm -rf ./dist && tsc",
+    "build:zod-schemas": "ts-to-zod ./src/types.ts ./src/schemas.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
@@ -42,9 +43,11 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "prettier": "3.2.5",
+    "ts-to-zod": "^3.7.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "commander": "^12.0.0"
+    "commander": "^12.0.0",
+    "zod": "^3.22.4"
   }
 }
