@@ -1,0 +1,8 @@
+{
+  "[javascript]": {
+    "editor.formatOnSave": false // do not format via global formatter (which may be prettier and lack some eslint rules that could autoFix)
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}
