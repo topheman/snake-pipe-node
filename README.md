@@ -1,5 +1,7 @@
 # snake-pipe-node
 
+[![npm](https://img.shields.io/npm/v/snakepipe?color=blue)](https://www.npmjs.com/package/snakepipe)
+
 A partial node implementation of my rust cli [topheman/snake-pipe-rust](https://github.com/topheman/snake-pipe-rust).
 
 ## Prerequisites
