@@ -1,6 +1,6 @@
 {
   "name": "snakepipe",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A node implementation of the rust snakepipe crate",
   "main": "index.js",
   "bin": {
