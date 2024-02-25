@@ -25,7 +25,10 @@
     "game",
     "snake",
     "unix",
-    "pipe"
+    "pipe",
+    "stream",
+    "async generator",
+    "zod"
   ],
   "author": "Christophe Rosset",
   "license": "MIT",
