@@ -9,7 +9,7 @@ A partial node implementation of my rust cli [topheman/snake-pipe-rust](https://
 ## Install
 
 ```sh
-npm install snakepipe # will install snakepipe-node
+npm install -g snakepipe # will install snakepipe-node
 ```
 
 Optional: Install the rust version - it will let you pipe original commands
