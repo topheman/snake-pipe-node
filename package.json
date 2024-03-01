@@ -2,11 +2,14 @@
   "name": "snakepipe",
   "version": "0.1.2",
   "description": "A node implementation of the rust snakepipe crate",
-  "main": "index.js",
+  "main": "dist/src/lib.js",
+  "types": "dist/src/lib.d.ts",
   "bin": {
     "snakepipe-node": "./bin.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "rm -rf ./dist && tsc",
     "build:zod-schemas": "ts-to-zod ./src/types.ts ./src/schemas.ts",
