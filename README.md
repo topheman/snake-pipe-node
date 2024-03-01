@@ -34,6 +34,14 @@ snakepipe gamestate|snakepipe-node validate
 snakepipe gamestate|snakepipe-node validate|snakepipe render
 ```
 
+## Usage as a library
+
+```
+npm install snakepipe
+```
+
+See example of usage on [topheman/snake-pipe-rust](https://github.com/topheman/snake-pipe-rust/tree/master/node-helpers/dev-server-sse/index.ts).
+
 ## Known bugs
 
 - tty issue when piping from `snakepipe gamestate` [#1](https://github.com/topheman/snake-pipe-node/issues/1)
