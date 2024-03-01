@@ -12,7 +12,7 @@ export function formatVersionToDisplay() {
   return `snakepipe@${packageJson.version}(node)`;
 }
 
-function makeLineIterator(stdinIterator: AsyncIterableIterator<string>) {
+export function makeLineIterator(stdinIterator: AsyncIterableIterator<string>) {
   return async function* () {
     for await (const line of stdinIterator) {
       yield gameSchema.parse(JSON.parse(line));
@@ -20,16 +20,22 @@ function makeLineIterator(stdinIterator: AsyncIterableIterator<string>) {
   };
 }
 
-export async function parseGameState() {
-  const readStdin = readline.createInterface({ input: stdin });
-  const stdinIterator = readStdin[Symbol.asyncIterator]();
+export async function parseGameStateFromAsyncIterator(
+  stream: AsyncIterableIterator<string>,
+) {
   const options = initOptionsSchema.parse(
-    JSON.parse((await stdinIterator.next()).value),
+    JSON.parse((await stream.next()).value),
   );
   return {
     options,
-    lines: makeLineIterator(stdinIterator),
+    lines: makeLineIterator(stream),
   };
+}
+
+export async function parseGameState() {
+  const readStdin = readline.createInterface({ input: stdin });
+  const stdinIterator = readStdin[Symbol.asyncIterator]();
+  return parseGameStateFromAsyncIterator(stdinIterator);
 }
 
 type StdoutStream = typeof process.stdout;
