@@ -35,5 +35,5 @@ export const initOptionsSchema = z.object({
     height: z.number(),
   }),
   featuresWithVersion: z.record(z.string()),
-  metadatas: z.record(z.string()).optional(),
+  metadatas: z.record(z.string()),
 });
