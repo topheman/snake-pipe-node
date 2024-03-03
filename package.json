@@ -1,6 +1,6 @@
 {
   "name": "snakepipe",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A node implementation of the rust snakepipe crate",
   "main": "dist/src/lib.js",
   "types": "dist/src/lib.d.ts",
