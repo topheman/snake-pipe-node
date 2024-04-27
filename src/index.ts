@@ -10,8 +10,7 @@ program
   .description(
     "Accepts stream from stdin, validates it and writes it to stdout",
   )
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  .action((options) => {
+  .action(() => {
     validate();
   });
 
