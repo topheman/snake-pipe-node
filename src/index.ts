@@ -1,9 +1,12 @@
 import { program } from "commander";
 
 import { version, formatVersionToDisplay } from "./common";
+import { resolvePath } from "./utils";
 import validate from "./validate";
+import fs from "node:fs";
+import { play } from "./net/play";
 
-const DEFAULT_UNIX_SOCKET_PATH = "/tmp/snakepipenode.sock";
+const DEFAULT_UNIX_SOCKET_PATH = "/tmp/snakepipe-node.sock";
 const DEFAULT_TCP_PORT = 8050;
 
 type SocketCommand = {
@@ -34,7 +37,17 @@ program
     DEFAULT_UNIX_SOCKET_PATH,
   )
   .action((options: SocketCommand) => {
-    console.log(options);
+    console.error(`[DEBUG][options] ${JSON.stringify(options)}`); // write debug to stderr
+    try {
+      fs.unlinkSync(resolvePath(options.path));
+    } catch (e) {
+      // do nothing
+    }
+    play({ mode: "socket" }).then(({ server, run }) => {
+      server.listen(options.path, () => {
+        run();
+      });
+    });
   });
 
 program
@@ -46,7 +59,7 @@ program
     DEFAULT_UNIX_SOCKET_PATH,
   )
   .action((options: SocketCommand) => {
-    console.log(options);
+    console.error(`[DEBUG][options] ${JSON.stringify(options)}`);
   });
 
 program
