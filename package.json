@@ -15,8 +15,7 @@
     "build:zod-schemas": "ts-to-zod ./src/types.ts ./src/schemas.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit",
-    "typecheck:lintstaged": "tsc --noEmit --resolveJsonModule --esModuleInterop",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 0",
     "prepare": "husky"
   },
