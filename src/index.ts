@@ -5,6 +5,8 @@ import { resolvePath, isTcpPortInUse } from "./utils";
 import validate from "./validate";
 import fs from "node:fs";
 import { play } from "./net/play";
+import { createClient } from "./net/net-client";
+import { isError } from "./utils";
 
 const DEFAULT_UNIX_SOCKET_PATH = "/tmp/snakepipe-node.sock";
 const DEFAULT_TCP_PORT = 8050;
@@ -48,6 +50,7 @@ program
         run();
       });
     });
+    // todo investigate when all sockets were closed once and some connection were reopenened, the process won't be stopped by ctrl+C
   });
 
 program
@@ -60,6 +63,22 @@ program
   )
   .action((options: SocketCommand) => {
     console.error(`[DEBUG][options] ${JSON.stringify(options)}`);
+    try {
+      const { client } = createClient({ path: options.path });
+      process.on("exit", () => {
+        client.destroy();
+      });
+      client.pipe(process.stdout);
+    } catch (e) {
+      if (isError(e)) {
+        if (e.code === "ENOENT") {
+          console.error(
+            `No existing socket file ${options.path} , make sure you run the socket-play command first`,
+          );
+          process.exit(1);
+        }
+      }
+    }
   });
 
 program
