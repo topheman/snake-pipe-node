@@ -24,6 +24,7 @@ export function createServer({ config }: CreateServerProps): {
 
     socket.on("end", () => {
       console.error("[DEBUG] disconnection from client"); // write debug to stderr
+      socket.destroy();
       sockets.delete(socket);
     });
   });
