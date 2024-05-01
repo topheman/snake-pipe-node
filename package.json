@@ -41,6 +41,7 @@
   "homepage": "https://github.com/topheman/snake-pipe-node#readme",
   "devDependencies": {
     "@types/node": "^20.11.20",
+    "@types/tcp-port-used": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
     "eslint": "^8.57.0",
@@ -54,6 +55,7 @@
   },
   "dependencies": {
     "commander": "^12.0.0",
+    "tcp-port-used": "^1.0.2",
     "zod": "^3.22.4"
   }
 }

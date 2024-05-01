@@ -1,7 +1,7 @@
 import { program } from "commander";
 
 import { version, formatVersionToDisplay } from "./common";
-import { resolvePath } from "./utils";
+import { resolvePath, isTcpPortInUse } from "./utils";
 import validate from "./validate";
 import fs from "node:fs";
 import { play } from "./net/play";
@@ -66,19 +66,30 @@ program
   .command("tcp-play")
   .description("Accepts gamestate from stdin and pushes it to a tcp socket")
   .option(
-    "--path",
+    "--port",
     `Port number (default: ${DEFAULT_TCP_PORT})`,
     DEFAULT_TCP_PORT.toString(),
   )
-  .action((options: TcpCommand) => {
-    console.log(options);
+  .action(async (options: TcpCommand) => {
+    const port = Number(options.port);
+    console.error(`[DEBUG][options] port=${port} ${JSON.stringify(options)}`);
+    const portIsInUse = await isTcpPortInUse(port);
+    if (portIsInUse) {
+      console.error(`Port ${port} is already taken.`);
+      process.exit(1);
+    }
+    play({ mode: "tcp" }).then(({ server, run }) => {
+      server.listen(options.port, () => {
+        run();
+      });
+    });
   });
 
 program
   .command("tcp-watch")
   .description("Reads gamestate from a tcp socket")
   .option(
-    "--path",
+    "--port",
     `Port number (default: ${DEFAULT_TCP_PORT})`,
     DEFAULT_TCP_PORT.toString(),
   )
