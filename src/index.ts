@@ -50,7 +50,6 @@ program
         run();
       });
     });
-    // todo investigate when all sockets were closed once and some connection were reopenened, the process won't be stopped by ctrl+C
   });
 
 program
