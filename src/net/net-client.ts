@@ -11,13 +11,25 @@ type CreateTcpProps = {
 
 type CreateClientProps = CreateSocketprops | CreateTcpProps;
 
+export function optionsHasPort(
+  options: CreateClientProps,
+): options is CreateTcpProps {
+  return "port" in options;
+}
+
+export function optionsHasPath(
+  options: CreateClientProps,
+): options is CreateSocketprops {
+  return "path" in options;
+}
+
 export function createClient(options: CreateClientProps): {
   client: net.Socket;
 } {
   const client = (() => {
-    if ("port" in options) {
+    if (optionsHasPort(options)) {
       return net.createConnection({ port: options.port });
-    } else if ("path" in options) {
+    } else if (optionsHasPath(options)) {
       const stat = fs.statSync(options.path);
       if (stat.isSocket()) {
         return net.createConnection({ path: options.path });
