@@ -37,7 +37,23 @@ export async function parseGameStateFromAsyncIterator(
   };
 }
 
-export async function parseGameState() {
+export type ParseGameStateProps = {
+  /**
+   * Will be called when the stream from `stdin` is closed.
+   * By default stops the current process with `process.exit(0)`
+   */
+  onStdinEnd?: () => void;
+};
+
+export async function parseGameState({
+  onStdinEnd = () => {
+    process.exit(0);
+  },
+}: ParseGameStateProps = {}) {
+  // once stdin in closed, exit the current process otherwise, it won't accept interupt signals
+  process.stdin.on("end", () => {
+    onStdinEnd();
+  });
   const readStdin = readline.createInterface({ input: stdin });
   const stdinIterator = readStdin[Symbol.asyncIterator]();
   return parseGameStateFromAsyncIterator(stdinIterator);
