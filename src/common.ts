@@ -15,7 +15,12 @@ export function formatVersionToDisplay() {
 export function makeLineIterator(stdinIterator: AsyncIterableIterator<string>) {
   return async function* () {
     for await (const line of stdinIterator) {
-      yield gameSchema.parse(JSON.parse(line));
+      try {
+        const result = gameSchema.parse(JSON.parse(line));
+        yield result;
+      } catch (e) {
+        console.error(`[DEBUG] Ignored invalid frame: ${line}`);
+      }
     }
   };
 }
@@ -43,8 +48,7 @@ type StdoutStream = typeof process.stdout;
 export function makeWriteLine(stdout: StdoutStream) {
   if (stdout.isTTY) {
     return function writeLineToTTY(str: string) {
-      process.stdout.write(`${str}\n`);
-      process.stdout.cursorTo(0);
+      process.stdout.write(`${str}\r\n`);
     };
   } else {
     return function writeLine(str: string) {
