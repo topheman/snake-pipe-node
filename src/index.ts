@@ -10,6 +10,7 @@ import { isError } from "./utils";
 
 const DEFAULT_UNIX_SOCKET_PATH = "/tmp/snakepipe-node.sock";
 const DEFAULT_TCP_PORT = 8050;
+const DEFAULT_TCP_HOST = "127.0.0.1";
 
 type SocketCommand = {
   path: string;
@@ -17,6 +18,7 @@ type SocketCommand = {
 
 type TcpCommand = {
   port: string;
+  host: string;
 };
 
 program.name(formatVersionToDisplay()).version(version());
@@ -95,16 +97,19 @@ program
     `Port number (default: ${DEFAULT_TCP_PORT})`,
     DEFAULT_TCP_PORT.toString(),
   )
+  .option("--host", `Tcp host (default: ${DEFAULT_TCP_HOST})`, DEFAULT_TCP_HOST)
   .action(async (options: TcpCommand) => {
     const port = Number(options.port);
-    console.error(`[DEBUG][options] port=${port} ${JSON.stringify(options)}`);
-    const portIsInUse = await isTcpPortInUse(port);
+    const host = options.host;
+    console.error(`[DEBUG][options] ${JSON.stringify(options)}`);
+    const portIsInUse = await isTcpPortInUse(port, host);
     if (portIsInUse) {
-      console.error(`[ERROR] Port ${port} is already taken.`);
+      console.error(`[ERROR] ${host}:${port} is already taken.`);
       process.exit(1);
     }
     play({ mode: "tcp" }).then(({ server, run }) => {
-      server.listen(options.port, () => {
+      server.listen({ port, host }, () => {
+        console.error(`[DEBUG] Listening on ${host}:${port}`);
         run();
       });
     });
@@ -115,10 +120,15 @@ program
   .description("Reads gamestate from a tcp socket")
   .option(
     "--port",
-    `Port number (default: ${DEFAULT_TCP_PORT})`, // todo ad --host
+    `Port number (default: ${DEFAULT_TCP_PORT})`,
     DEFAULT_TCP_PORT.toString(),
   )
+  .option("--host", `Tcp host (default: ${DEFAULT_TCP_HOST})`, DEFAULT_TCP_HOST)
   .action((options: TcpCommand) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const port = Number(options.port);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const host = options.host;
     console.log(options);
   });
 
