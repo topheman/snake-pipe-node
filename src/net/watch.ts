@@ -6,61 +6,48 @@ type CreateSocketprops = {
 
 type CreateTcpProps = {
   port: number;
+  host: string;
 };
 
-type PreCheckError = NodeJS.ErrnoException & { exitCode: number };
+type CreateClientProps = CreateSocketprops | CreateTcpProps;
 
-type CreateClientPreCheckProps<
-  T extends CreateSocketprops | CreateTcpProps =
-    | CreateSocketprops
-    | CreateTcpProps,
-> = {
-  preCheck: <U = PreCheckError | null>(options: T) => U | Promise<U>;
-};
-
-type CreateClientProps = (CreateSocketprops | CreateTcpProps) &
-  CreateClientPreCheckProps;
-
-function optionsHasPort(
-  options: CreateClientProps,
-): options is CreateTcpProps & CreateClientPreCheckProps {
-  return "port" in options;
+function optionsIsTcp(options: CreateClientProps): options is CreateTcpProps {
+  return "port" in options && "host" in options;
 }
 
-function optionsHasPath(
+function optionsIsSocket(
   options: CreateClientProps,
-): options is CreateSocketprops & CreateClientPreCheckProps {
+): options is CreateSocketprops {
   return "path" in options;
 }
 
-export async function createClient(options: CreateClientProps): Promise<{
-  client: net.Socket;
-}> {
-  const client = await (async () => {
-    const preCheckResult = await options.preCheck(options); // need to call await because it can be a promise
-    if (preCheckResult) {
-      console.error(preCheckResult.message);
-      process.exit(preCheckResult.exitCode ?? 1);
-    }
-    if (optionsHasPort(options)) {
-      return net.createConnection({ port: options.port });
-    } else if (optionsHasPath(options)) {
-      // const stat = fs.statSync(options.path);
-      // if (stat.isSocket()) {
-      return net.createConnection({ path: options.path });
-      // }
-      // throw new Error(`No socket opened at ${options.path}`);
-    } else {
-      throw new Error(`You must pass either port or path as argument`);
-    }
-  })();
-
+function bindClient(client: net.Socket) {
   process.on("exit", () => {
     client.destroy();
   });
   client.pipe(process.stdout);
+}
+
+export function createClient(options: CreateClientProps): {
+  client: net.Socket;
+  /**
+   * - Pipes client to `stdout`
+   * - Binds `client.destroy()` to process.on('exit')
+   */
+  bindClient: typeof bindClient;
+} {
+  const client = (() => {
+    if (optionsIsTcp(options)) {
+      return net.createConnection({ port: options.port, host: options.host });
+    } else if (optionsIsSocket(options)) {
+      return net.createConnection({ path: options.path });
+    } else {
+      throw new Error(`You must pass either host/port or path as argument`);
+    }
+  })();
 
   return {
     client,
+    bindClient,
   };
 }

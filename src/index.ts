@@ -5,7 +5,7 @@ import { resolvePath, isTcpPortInUse } from "./utils";
 import validate from "./validate";
 import fs from "node:fs";
 import { play } from "./net/play";
-import { createClient } from "./net/net-client";
+import { createClient } from "./net/watch";
 import { isError } from "./utils";
 
 const DEFAULT_UNIX_SOCKET_PATH = "/tmp/snakepipe-node.sock";
@@ -62,20 +62,27 @@ program
   )
   .action((options: SocketCommand) => {
     console.error(`[DEBUG][options] ${JSON.stringify(options)}`);
+    const stat = fs.statSync(options.path);
+    if (!stat.isSocket()) {
+      console.error(`[ERROR] No existing socket file at ${options.path}`);
+      process.exit(1);
+    }
     try {
-      const { client } = createClient({ path: options.path });
-      process.on("exit", () => {
-        client.destroy();
-      });
-      client.pipe(process.stdout);
-    } catch (e) {
-      if (isError(e)) {
-        if (e.code === "ENOENT") {
+      const { client, bindClient } = createClient({ path: options.path });
+      bindClient(client);
+      client.on("error", (e) => {
+        if (isError(e) && e.code === "ECONNREFUSED") {
           console.error(
-            `No existing socket file ${options.path} , make sure you run the socket-play command first`,
+            `[ERROR] Could not connect to socket at ${options.path}, make sure you first launch socket-play`,
           );
           process.exit(1);
         }
+      });
+    } catch (e) {
+      if (isError(e)) {
+        console.error(
+          `[ERROR] Could not open socket at ${options.path} - ${e.code} - ${e.message}`,
+        );
       }
     }
   });
@@ -93,7 +100,7 @@ program
     console.error(`[DEBUG][options] port=${port} ${JSON.stringify(options)}`);
     const portIsInUse = await isTcpPortInUse(port);
     if (portIsInUse) {
-      console.error(`Port ${port} is already taken.`);
+      console.error(`[ERROR] Port ${port} is already taken.`);
       process.exit(1);
     }
     play({ mode: "tcp" }).then(({ server, run }) => {
@@ -108,7 +115,7 @@ program
   .description("Reads gamestate from a tcp socket")
   .option(
     "--port",
-    `Port number (default: ${DEFAULT_TCP_PORT})`,
+    `Port number (default: ${DEFAULT_TCP_PORT})`, // todo ad --host
     DEFAULT_TCP_PORT.toString(),
   )
   .action((options: TcpCommand) => {
