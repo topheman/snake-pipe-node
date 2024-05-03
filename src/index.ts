@@ -35,11 +35,7 @@ program
 program
   .command("socket-play")
   .description("Accepts gamestate from stdin and pushes it to a unix socket")
-  .option(
-    "--path",
-    `Unix socket file path (default: ${DEFAULT_UNIX_SOCKET_PATH})`,
-    DEFAULT_UNIX_SOCKET_PATH,
-  )
+  .option("--path <path>", "Unix socket file path", DEFAULT_UNIX_SOCKET_PATH)
   .action((options: SocketCommand) => {
     console.error(`[DEBUG][options] ${JSON.stringify(options)}`); // write debug to stderr
     try {
@@ -57,11 +53,7 @@ program
 program
   .command("socket-watch")
   .description("Reads gamestate from a unix socket")
-  .option(
-    "--path",
-    `Unix socket file path (default: ${DEFAULT_UNIX_SOCKET_PATH})`,
-    DEFAULT_UNIX_SOCKET_PATH,
-  )
+  .option("--path <path>", "Unix socket file path", DEFAULT_UNIX_SOCKET_PATH)
   .action((options: SocketCommand) => {
     console.error(`[DEBUG][options] ${JSON.stringify(options)}`);
     const stat = fs.statSync(options.path);
@@ -92,12 +84,12 @@ program
 program
   .command("tcp-play")
   .description("Accepts gamestate from stdin and pushes it to a tcp socket")
+  .option("--port <port>", "Port number", DEFAULT_TCP_PORT.toString())
   .option(
-    "--port",
-    `Port number (default: ${DEFAULT_TCP_PORT})`,
-    DEFAULT_TCP_PORT.toString(),
+    "--host <host>",
+    `Tcp host (default: ${DEFAULT_TCP_HOST})`,
+    DEFAULT_TCP_HOST,
   )
-  .option("--host", `Tcp host (default: ${DEFAULT_TCP_HOST})`, DEFAULT_TCP_HOST)
   .action(async (options: TcpCommand) => {
     const port = Number(options.port);
     const host = options.host;
@@ -118,18 +110,30 @@ program
 program
   .command("tcp-watch")
   .description("Reads gamestate from a tcp socket")
-  .option(
-    "--port",
-    `Port number (default: ${DEFAULT_TCP_PORT})`,
-    DEFAULT_TCP_PORT.toString(),
-  )
-  .option("--host", `Tcp host (default: ${DEFAULT_TCP_HOST})`, DEFAULT_TCP_HOST)
+  .option("--port <path>", "Port number", DEFAULT_TCP_PORT.toString())
+  .option("--host <host>", "Tcp host", DEFAULT_TCP_HOST)
   .action((options: TcpCommand) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const port = Number(options.port);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const host = options.host;
-    console.log(options);
+    console.error(`[DEBUG][options] ${JSON.stringify(options)}`);
+    try {
+      const { client, bindClient } = createClient({ port, host });
+      bindClient(client);
+      client.on("error", (e) => {
+        if (isError(e) && e.code === "ECONNREFUSED") {
+          console.error(
+            `[ERROR] Could not connect to ${host}:${port}, make sure you first launch tcp-play`,
+          );
+          process.exit(1);
+        }
+      });
+    } catch (e) {
+      if (isError(e)) {
+        console.error(
+          `[ERROR] Could not open connection to ${host}:${port} - ${e.code} - ${e.message}`,
+        );
+      }
+    }
   });
 
 program.parse();
