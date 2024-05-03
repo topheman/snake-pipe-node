@@ -9,8 +9,11 @@ export function resolvePath(inputPath: string) {
   return path.resolve(process.cwd(), inputPath);
 }
 
-export function isTcpPortInUse(port: number): Promise<boolean> {
-  return tcpPortUsed.check(port, "127.0.0.1").then(
+export function isTcpPortInUse(
+  port: number,
+  host: string = "127.0.0.1",
+): Promise<boolean> {
+  return tcpPortUsed.check(port, host).then(
     function (inUse) {
       return inUse;
     },
