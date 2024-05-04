@@ -3,6 +3,7 @@ import { stdin } from "node:process";
 
 import packageJson from "../package.json";
 import { initOptionsSchema, gameSchema } from "./schemas";
+import { eprintln, println } from "./utils";
 
 export function version() {
   return packageJson.version;
@@ -19,7 +20,7 @@ export function makeLineIterator(stdinIterator: AsyncIterableIterator<string>) {
         const result = gameSchema.parse(JSON.parse(line));
         yield result;
       } catch (e) {
-        console.error(`[DEBUG] Ignored invalid frame: ${line}`);
+        eprintln(`[DEBUG] Ignored invalid frame: ${line}`);
       }
     }
   };
@@ -64,11 +65,11 @@ type StdoutStream = typeof process.stdout;
 export function makeWriteLine(stdout: StdoutStream) {
   if (stdout.isTTY) {
     return function writeLineToTTY(str: string) {
-      process.stdout.write(`${str}\r\n`);
+      println(str);
     };
   } else {
     return function writeLine(str: string) {
-      console.log(str);
+      println(str);
     };
   }
 }
