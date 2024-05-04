@@ -26,3 +26,19 @@ export function isTcpPortInUse(
 export function isError(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error;
 }
+
+export function print(str: string) {
+  process.stdout.write(str);
+}
+
+export function println(str: string) {
+  process.stdout.write(`${str}\r\n`);
+}
+
+export function eprint(str: string) {
+  process.stderr.write(str);
+}
+
+export function eprintln(str: string) {
+  process.stderr.write(`${str}\r\n`);
+}

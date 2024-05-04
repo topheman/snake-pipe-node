@@ -1,7 +1,7 @@
 import { program } from "commander";
 
 import { version, formatVersionToDisplay } from "./common";
-import { resolvePath, isTcpPortInUse } from "./utils";
+import { resolvePath, isTcpPortInUse, eprintln } from "./utils";
 import validate from "./validate";
 import fs from "node:fs";
 import { play } from "./net/play";
@@ -37,7 +37,7 @@ program
   .description("Accepts gamestate from stdin and pushes it to a unix socket")
   .option("--path <path>", "Unix socket file path", DEFAULT_UNIX_SOCKET_PATH)
   .action((options: SocketCommand) => {
-    console.error(`[DEBUG][options] ${JSON.stringify(options)}`); // write debug to stderr
+    eprintln(`[DEBUG][options] ${JSON.stringify(options)}`);
     try {
       fs.unlinkSync(resolvePath(options.path));
     } catch (e) {
@@ -55,10 +55,10 @@ program
   .description("Reads gamestate from a unix socket")
   .option("--path <path>", "Unix socket file path", DEFAULT_UNIX_SOCKET_PATH)
   .action((options: SocketCommand) => {
-    console.error(`[DEBUG][options] ${JSON.stringify(options)}`);
+    eprintln(`[DEBUG][options] ${JSON.stringify(options)}`);
     const stat = fs.statSync(options.path);
     if (!stat.isSocket()) {
-      console.error(`[ERROR] No existing socket file at ${options.path}`);
+      eprintln(`[ERROR] No existing socket file at ${options.path}`);
       process.exit(1);
     }
     try {
@@ -66,7 +66,7 @@ program
       bindClient(client);
       client.on("error", (e) => {
         if (isError(e) && e.code === "ECONNREFUSED") {
-          console.error(
+          eprintln(
             `[ERROR] Could not connect to socket at ${options.path}, make sure you first launch socket-play`,
           );
           process.exit(1);
@@ -74,7 +74,7 @@ program
       });
     } catch (e) {
       if (isError(e)) {
-        console.error(
+        eprintln(
           `[ERROR] Could not open socket at ${options.path} - ${e.code} - ${e.message}`,
         );
       }
@@ -93,15 +93,15 @@ program
   .action(async (options: TcpCommand) => {
     const port = Number(options.port);
     const host = options.host;
-    console.error(`[DEBUG][options] ${JSON.stringify(options)}`);
+    process.stderr.write(`[DEBUG][options] ${JSON.stringify(options)}\r\n`);
     const portIsInUse = await isTcpPortInUse(port, host);
     if (portIsInUse) {
-      console.error(`[ERROR] ${host}:${port} is already taken.`);
+      process.stderr.write(`[ERROR] ${host}:${port} is already taken.\r\n`);
       process.exit(1);
     }
     play({ mode: "tcp" }).then(({ server, run }) => {
       server.listen({ port, host }, () => {
-        console.error(`[DEBUG] Listening on ${host}:${port}`);
+        process.stderr.write(`[DEBUG] Listening on ${host}:${port}\r\n`);
         run();
       });
     });
@@ -115,22 +115,22 @@ program
   .action((options: TcpCommand) => {
     const port = Number(options.port);
     const host = options.host;
-    console.error(`[DEBUG][options] ${JSON.stringify(options)}`);
+    process.stderr.write(`[DEBUG][options] ${JSON.stringify(options)}\r\n`);
     try {
       const { client, bindClient } = createClient({ port, host });
       bindClient(client);
       client.on("error", (e) => {
         if (isError(e) && e.code === "ECONNREFUSED") {
-          console.error(
-            `[ERROR] Could not connect to ${host}:${port}, make sure you first launch tcp-play`,
+          process.stderr.write(
+            `[ERROR] Could not connect to ${host}:${port}, make sure you first launch tcp-play\r\n`,
           );
           process.exit(1);
         }
       });
     } catch (e) {
       if (isError(e)) {
-        console.error(
-          `[ERROR] Could not open connection to ${host}:${port} - ${e.code} - ${e.message}`,
+        process.stderr.write(
+          `[ERROR] Could not open connection to ${host}:${port} - ${e.code} - ${e.message}\r\n`,
         );
       }
     }
