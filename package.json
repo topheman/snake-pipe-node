@@ -5,7 +5,7 @@
   "main": "dist/src/lib.js",
   "types": "dist/src/lib.d.ts",
   "bin": {
-    "snakepipe-node": "./bin.js"
+    "snakepipenode": "./bin.js"
   },
   "files": [
     "dist"
