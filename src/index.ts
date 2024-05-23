@@ -8,7 +8,7 @@ import { play } from "./net/play";
 import { createClient } from "./net/watch";
 import { isError } from "./utils";
 
-const DEFAULT_UNIX_SOCKET_PATH = "/tmp/snakepipe-node.sock";
+const DEFAULT_UNIX_SOCKET_PATH = "/tmp/snakepipe.sock";
 const DEFAULT_TCP_PORT = 8050;
 const DEFAULT_TCP_HOST = "127.0.0.1";
 
@@ -45,6 +45,7 @@ program
     }
     play({ mode: "socket" }).then(({ server, run }) => {
       server.listen(options.path, () => {
+        // todo use `resolvePath`
         run();
       });
     });
