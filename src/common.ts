@@ -3,7 +3,7 @@ import { stdin } from "node:process";
 
 import packageJson from "../package.json";
 import { initOptionsSchema, gameSchema } from "./schemas";
-import { eprintln, println } from "./utils";
+import { println } from "./utils";
 
 export function version() {
   return packageJson.version;
@@ -20,7 +20,7 @@ export function makeLineIterator(stdinIterator: AsyncIterableIterator<string>) {
         const result = gameSchema.parse(JSON.parse(line));
         yield result;
       } catch (e) {
-        eprintln(`[DEBUG] Ignored invalid frame: ${line}`);
+        // eprintln(`[DEBUG] Ignored invalid frame: ${line}`);
       }
     }
   };
@@ -73,3 +73,10 @@ export function makeWriteLine(stdout: StdoutStream) {
     };
   }
 }
+
+export const exitcode = {
+  DATAERR: 65,
+  UNAVAILABLE: 69,
+  OSFILE: 72,
+  IOERR: 74,
+} as const;

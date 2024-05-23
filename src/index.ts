@@ -1,6 +1,6 @@
 import { program } from "commander";
 
-import { version, formatVersionToDisplay } from "./common";
+import { version, formatVersionToDisplay, exitcode } from "./common";
 import { resolvePath, isTcpPortInUse, eprintln } from "./utils";
 import validate from "./validate";
 import fs from "node:fs";
@@ -37,15 +37,13 @@ program
   .description("Accepts gamestate from stdin and pushes it to a unix socket")
   .option("--path <path>", "Unix socket file path", DEFAULT_UNIX_SOCKET_PATH)
   .action((options: SocketCommand) => {
-    eprintln(`[DEBUG][options] ${JSON.stringify(options)}`);
     try {
       fs.unlinkSync(resolvePath(options.path));
     } catch (e) {
       // do nothing
     }
     play({ mode: "socket" }).then(({ server, run }) => {
-      server.listen(options.path, () => {
-        // todo use `resolvePath`
+      server.listen(resolvePath(options.path), () => {
         run();
       });
     });
@@ -56,11 +54,16 @@ program
   .description("Reads gamestate from a unix socket")
   .option("--path <path>", "Unix socket file path", DEFAULT_UNIX_SOCKET_PATH)
   .action((options: SocketCommand) => {
-    eprintln(`[DEBUG][options] ${JSON.stringify(options)}`);
-    const stat = fs.statSync(options.path);
-    if (!stat.isSocket()) {
+    let stat: ReturnType<typeof fs.statSync>;
+    try {
+      stat = fs.statSync(options.path);
+    } catch (e) {
+      eprintln(`[ERROR] No existing file at ${options.path}`);
+      process.exit(exitcode.OSFILE);
+    }
+    if (!stat!.isSocket()) {
       eprintln(`[ERROR] No existing socket file at ${options.path}`);
-      process.exit(1);
+      process.exit(exitcode.OSFILE);
     }
     try {
       const { client, bindClient } = createClient({ path: options.path });
@@ -70,7 +73,7 @@ program
           eprintln(
             `[ERROR] Could not connect to socket at ${options.path}, make sure you first launch socket-play`,
           );
-          process.exit(1);
+          process.exit(exitcode.IOERR);
         }
       });
     } catch (e) {
@@ -78,6 +81,7 @@ program
         eprintln(
           `[ERROR] Could not open socket at ${options.path} - ${e.code} - ${e.message}`,
         );
+        process.exit(1);
       }
     }
   });
@@ -94,15 +98,13 @@ program
   .action(async (options: TcpCommand) => {
     const port = Number(options.port);
     const host = options.host;
-    process.stderr.write(`[DEBUG][options] ${JSON.stringify(options)}\r\n`);
     const portIsInUse = await isTcpPortInUse(port, host);
     if (portIsInUse) {
       process.stderr.write(`[ERROR] ${host}:${port} is already taken.\r\n`);
-      process.exit(1);
+      process.exit(exitcode.UNAVAILABLE);
     }
     play({ mode: "tcp" }).then(({ server, run }) => {
       server.listen({ port, host }, () => {
-        process.stderr.write(`[DEBUG] Listening on ${host}:${port}\r\n`);
         run();
       });
     });
@@ -116,7 +118,6 @@ program
   .action((options: TcpCommand) => {
     const port = Number(options.port);
     const host = options.host;
-    process.stderr.write(`[DEBUG][options] ${JSON.stringify(options)}\r\n`);
     try {
       const { client, bindClient } = createClient({ port, host });
       bindClient(client);
@@ -125,7 +126,7 @@ program
           process.stderr.write(
             `[ERROR] Could not connect to ${host}:${port}, make sure you first launch tcp-play\r\n`,
           );
-          process.exit(1);
+          process.exit(exitcode.IOERR);
         }
       });
     } catch (e) {
@@ -133,6 +134,7 @@ program
         process.stderr.write(
           `[ERROR] Could not open connection to ${host}:${port} - ${e.code} - ${e.message}\r\n`,
         );
+        process.exit(1);
       }
     }
   });
